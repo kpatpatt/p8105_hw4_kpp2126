@@ -134,13 +134,11 @@ tidycity_df =
 6. Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
 ```{r plot}
 tidycity_df %>%
-  
-  
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = estimate, y = city_state)) +
+  geom_point() +
+  geom_errorbar(aes(xmin = conf.low, xmax = conf.high))
 ```
-
-
-
-
 
 ## Problem 3
 ```{r}
