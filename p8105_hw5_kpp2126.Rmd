@@ -192,8 +192,8 @@ sim_5000_results = bind_rows(output)
 ```
 
 
-Repeat the above for μ={1,2,3,4,5,6}, and complete the following:
-```{r iteration for 6}
+3. Repeat the above for μ={1,2,3,4,5,6}, and complete the following:
+```{r iteration for 1:6}
 sim_six_test =
   tibble(
     mu = c(1, 2, 3, 4, 5, 6)) %>% 
@@ -206,21 +206,72 @@ sim_six_test =
 #sim_six_test
 ```
 
-Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
+- Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. 
 ```{r plot prop null rejected}
-
+plot_power = 
+  sim_six_test %>% 
+  filter(p_value < 0.05) %>% #showing only when null was rejected
+  group_by(mu) %>% #grouping by the 1:6 iterations
+  summarize(rejection = n()) %>% #getting counts of rejection
+  mutate(prop_rejection = rejection / 5000) %>% #calculating proportion of times null was rejected from 5000 simulations
+  ggplot(aes(x = mu, y = prop_rejection)) +
+  geom_point() + 
+  geom_line() +
+  scale_x_continuous(limits = c(0,6), breaks = seq(0, 6, by=1)) +
+  scale_y_continuous(limits = c(0.1,1), breaks = seq(0.1, 1, by=0.1)) +
+  labs(
+    title = "The Power of the Test",
+    y = "Power",
+    x = "True μ"
+  )
+plot_power
 ```
+- Describe the association between effect size and power.
+The `plot_power` illustrates that as the true mu increases (effect size) the power of rejecting the null hypothesis also increases. We see that the power reaches a threshold near 1 as the true mu = 4.
 
-Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis
+- Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis
 ```{r}
-
+plot1 = 
+  sim_six_test %>% 
+  group_by(mu) %>% 
+  summarize(average_estimate_mu = mean(mu_hat)) %>% 
+  ggplot(aes(x = mu, y = average_estimate_mu)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(limits = c(0,6), breaks = seq(0, 6, by=1)) +
+  scale_y_continuous(limits = c(0,7), breaks = seq(0, 7, by=1)) +
+  labs(
+    title = "Average estimates of μ by true value of μ",
+    x = "True μ",
+    y = "Average estimated μ"
+  )
+plot1
 ```
 
-Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis.
+- Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis.
 ```{r}
-
+plot2 =
+  sim_six_test %>% 
+  filter(p_value < 0.05) %>% 
+  group_by(mu) %>% 
+  summarize(average_estimate_mu = mean(mu_hat)) %>% 
+  ggplot(aes(x = mu, y = average_estimate_mu)) +
+  geom_point() + 
+  geom_line()+
+  scale_x_continuous(limits = c(0,6), breaks = seq(0, 6, by=1)) +
+  scale_y_continuous(limits = c(0,7), breaks = seq(0, 7, by=1)) +
+  labs(
+    title = "Average estimates of μ for rejected null tests by true μ",
+    x = "True μ",
+    y = "Average estimated μ"
+  )
+plot2
+```
+**combined plots**
+```{r}
+plot1 + plot2
 ```
 
-Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+- Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
 
 
